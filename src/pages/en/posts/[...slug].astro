@@ -1,0 +1,17 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BlogPost from '../../../layouts/BlogPost.astro';
+import { getAllPublishedPosts, postSlug } from '../../../utils/posts';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+	const posts = await getAllPublishedPosts('en');
+	return posts.map((post) => ({
+		params: { slug: postSlug(post) },
+		props: { post },
+	}));
+};
+
+const { post } = Astro.props;
+---
+
+<BlogPost post={post} lang="en" />

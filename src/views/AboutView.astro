@@ -1,0 +1,22 @@
+---
+import Page from '../layouts/Page.astro';
+import { ts, type Lang } from '../i18n/ui';
+
+interface Props {
+	lang?: Lang;
+}
+
+const { lang = 'zh' } = Astro.props;
+---
+
+<Page title={ts(lang, 'about_title')} lang={lang}>
+	<p>{ts(lang, 'about_p1')}</p>
+	<p>{ts(lang, 'about_p2')}</p>
+	<h2>{ts(lang, 'about_contact')}</h2>
+	<ul>
+		<li>GitHub：<a href="https://github.com/" target="_blank" rel="noopener">github.com</a></li>
+		<li>Email：your@email.com</li>
+	</ul>
+	<h2>{ts(lang, 'about_site')}</h2>
+	<p>{ts(lang, 'about_site_p')}</p>
+</Page>

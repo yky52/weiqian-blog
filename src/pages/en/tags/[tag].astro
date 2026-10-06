@@ -1,0 +1,22 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getPublicPosts } from '../../../utils/posts';
+import TagView from '../../../views/TagView.astro';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+	const posts = await getPublicPosts('en');
+	const names = new Set<string>();
+	for (const post of posts) {
+		names.add(post.data.category);
+		for (const t of post.data.tags) names.add(t);
+	}
+	return [...names].map((tag) => ({ params: { tag }, props: { tag } }));
+};
+
+const { tag } = Astro.props;
+const posts = (await getPublicPosts('en')).filter(
+	(p) => p.data.category === tag || p.data.tags.includes(tag)
+);
+---
+
+<TagView lang="en" tag={tag} posts={posts} />

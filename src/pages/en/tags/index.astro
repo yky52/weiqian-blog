@@ -1,0 +1,20 @@
+---
+import { getPublicPosts } from '../../../utils/posts';
+import TagsView from '../../../views/TagsView.astro';
+
+const posts = await getPublicPosts('en');
+const counts = new Map<string, { count: number; kind: 'category' | 'tag' }>();
+for (const post of posts) {
+	const c = counts.get(post.data.category) ?? { count: 0, kind: 'category' as const };
+	c.count++;
+	counts.set(post.data.category, c);
+	for (const t of post.data.tags) {
+		const e = counts.get(t) ?? { count: 0, kind: 'tag' as const };
+		e.count++;
+		counts.set(t, e);
+	}
+}
+const entries = [...counts.entries()].sort((a, b) => b[1].count - a[1].count);
+---
+
+<TagsView lang="en" entries={entries} />
