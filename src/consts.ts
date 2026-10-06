@@ -2,7 +2,7 @@
 export const SITE_TITLE = 'WEIQIAN';
 export const SITE_DESCRIPTION_ZH = '记录技术与生活';
 export const SITE_DESCRIPTION_EN = 'Notes on tech and life';
-export const SITE_URL = 'https://blog.example.com'; // 上线后替换为真实域名
+export const SITE_URL = 'https://weiqian-blog.pages.dev';
 export const AUTHOR = 'WEIQIAN';
 
 // 每页文章数
