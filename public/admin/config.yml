@@ -5,7 +5,7 @@ backend:
   name: github
   repo: yky52/weiqian-blog
   branch: main
-  base_url: https://weiqian-blog.pages.dev
+  base_url: https://weiqian999.dpdns.org
   auth_endpoint: oauth/auth
 
 # 上传的图片存放位置
