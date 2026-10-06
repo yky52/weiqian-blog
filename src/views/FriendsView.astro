@@ -1,0 +1,25 @@
+---
+import { FRIENDS } from '../data/friends';
+import Page from '../layouts/Page.astro';
+import { ts, type Lang } from '../i18n/ui';
+
+interface Props {
+	lang?: Lang;
+}
+
+const { lang = 'zh' } = Astro.props;
+---
+
+<Page title={ts(lang, 'friends_title')} description={ts(lang, 'friends_intro')} lang={lang}>
+	<p>{ts(lang, 'friends_intro')}</p>
+	<div class="friend-grid">
+		{
+			FRIENDS.map((f) => (
+				<a class="friend-card" href={f.url} target="_blank" rel="noopener">
+					<div class="name">{f.name}</div>
+					<p class="desc">{f.desc}</p>
+				</a>
+			))
+		}
+	</div>
+</Page>

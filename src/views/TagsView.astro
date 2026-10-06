@@ -1,0 +1,37 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { htmlLang, ts, type Lang } from '../i18n/ui';
+
+interface Props {
+	lang?: Lang;
+	entries: [string, { count: number; kind: 'category' | 'tag' }][];
+}
+
+const { lang = 'zh', entries } = Astro.props;
+const tagBase = lang === 'en' ? '/en/tags' : '/tags';
+---
+
+<html lang={htmlLang(lang)}>
+	<head>
+		<BaseHead title={ts(lang, 'tags_title')} lang={lang} />
+	</head>
+	<body>
+		<Header lang={lang} />
+		<main data-pagefind-body>
+			<h1 style="margin-top:0">{ts(lang, 'tags_title')}</h1>
+			<div style="display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:1.5rem">
+				{
+					entries.map(([name, { count, kind }]) => (
+						<a class="tag" href={`${tagBase}/${encodeURIComponent(name)}/`} style="font-size:0.9rem;padding:0.35rem 0.9rem">
+							{kind === 'category' ? '📁' : '#'}
+							{name} ({count})
+						</a>
+					))
+				}
+			</div>
+		</main>
+		<Footer lang={lang} />
+	</body>
+</html>

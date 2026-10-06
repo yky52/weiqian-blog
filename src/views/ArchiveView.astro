@@ -1,0 +1,51 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { htmlLang, t, ts, type Lang } from '../i18n/ui';
+import { formatDate } from '../utils/format';
+import { postUrl } from '../utils/posts';
+
+interface Props {
+	lang?: Lang;
+	posts: CollectionEntry<'blog'>[];
+}
+
+const { lang = 'zh', posts } = Astro.props;
+const byYear = new Map<number, typeof posts>();
+for (const post of posts) {
+	const year = post.data.pubDate.getFullYear();
+	if (!byYear.has(year)) byYear.set(year, []);
+	byYear.get(year)!.push(post);
+}
+const years = [...byYear.keys()].sort((a, b) => b - a);
+const countText = t(lang, 'archive_count');
+---
+
+<html lang={htmlLang(lang)}>
+	<head>
+		<BaseHead title={ts(lang, 'archive_title')} lang={lang} />
+	</head>
+	<body>
+		<Header lang={lang} />
+		<main data-pagefind-body>
+			<h1 style="margin-top:0">{ts(lang, 'archive_title')}</h1>
+			<p style="color:var(--text-soft)">{typeof countText === 'function' ? countText(posts.length) : countText}</p>
+			{
+				years.map((year) => (
+					<section>
+						<h2 class="archive-year">{year}</h2>
+						{byYear.get(year)!.map((post) => (
+							<div class="archive-item">
+								<time>{formatDate(post.data.pubDate).slice(5)}</time>
+								<a href={postUrl(post)}>{post.data.title}</a>
+							</div>
+						))}
+					</section>
+				))
+			}
+		</main>
+		<Footer lang={lang} />
+	</body>
+</html>

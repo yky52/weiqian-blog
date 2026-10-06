@@ -1,0 +1,28 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { ts } from '../i18n/ui';
+---
+
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`${ts('zh', 'notfound_title')} / ${ts('en', 'notfound_title')}`} noindex />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="not-found">
+				<h1>404</h1>
+				<p>{ts('zh', 'notfound_text')}</p>
+				<p>{ts('en', 'notfound_text')}</p>
+				<p>
+					<a href="/">{ts('zh', 'notfound_back')}</a>
+					{' · '}
+					<a href="/en/">{ts('en', 'notfound_back')}</a>
+				</p>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

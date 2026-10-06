@@ -1,0 +1,34 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import PostCard from '../components/PostCard.astro';
+import { htmlLang, t, type Lang } from '../i18n/ui';
+
+interface Props {
+	lang?: Lang;
+	tag: string;
+	posts: CollectionEntry<'blog'>[];
+}
+
+const { lang = 'zh', tag, posts } = Astro.props;
+const countText = t(lang, 'tag_count');
+// 标签页无法保证另一语言有同名标签，语言切换回退到标签首页
+const tagsHome = lang === 'en' ? '/tags' : '/en/tags';
+---
+
+<html lang={htmlLang(lang)}>
+	<head>
+		<BaseHead title={tag} description={typeof countText === 'function' ? countText(posts.length) : ''} lang={lang} />
+	</head>
+	<body>
+		<Header lang={lang} langSwitchUrl={tagsHome} />
+		<main data-pagefind-body>
+			<h1 style="margin-top:0">🏷️ {tag}</h1>
+			<p style="color:var(--text-soft)">{typeof countText === 'function' ? countText(posts.length) : countText}</p>
+			{posts.map((post) => <PostCard post={post} lang={lang} />)}
+		</main>
+		<Footer lang={lang} />
+	</body>
+</html>
