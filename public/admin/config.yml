@@ -1,0 +1,74 @@
+# Decap CMS 配置：网页版写作后台
+# 使用前需要配置 GitHub OAuth（见 README 的部署说明）
+backend:
+  name: github
+  repo: yourname/yourrepo # 改成你的 GitHub 仓库
+  branch: main
+  base_url: https://your-oauth-proxy.workers.dev # GitHub OAuth 代理地址
+
+# 上传的图片存放位置
+media_folder: 'public/images/uploads'
+public_folder: '/images/uploads'
+
+collections:
+  - name: 'blog_zh'
+    label: '中文文章'
+    folder: 'src/content/blog/zh'
+    create: true
+    slug: '{{year}}/{{slug}}'
+    editor:
+      preview: true
+    fields:
+      - { label: '标题', name: 'title', widget: 'string' }
+      - { label: '摘要', name: 'description', widget: 'text', hint: '自定义摘要，显示在列表页' }
+      - { label: '发布日期', name: 'pubDate', widget: 'datetime', format: 'YYYY-MM-DD' }
+      - {
+          label: '分类',
+          name: 'category',
+          widget: 'select',
+          options: ['技术', '随笔', '读书笔记'],
+          default: '随笔',
+        }
+      - { label: '标签', name: 'tags', widget: 'list', default: [] }
+      - { label: '特色头图', name: 'heroImage', widget: 'image', required: false }
+      - { label: '置顶', name: 'sticky', widget: 'boolean', default: false }
+      - { label: '草稿', name: 'draft', widget: 'boolean', default: false }
+      - {
+          label: '可见性',
+          name: 'visibility',
+          widget: 'select',
+          options: ['public', 'private'],
+          default: 'public',
+          hint: 'private 为私密：仅直接链接可访问',
+        }
+      - { label: '正文', name: 'body', widget: 'markdown' }
+  - name: 'blog_en'
+    label: 'English Posts'
+    folder: 'src/content/blog/en'
+    create: true
+    slug: '{{year}}/{{slug}}'
+    editor:
+      preview: true
+    fields:
+      - { label: 'Title', name: 'title', widget: 'string' }
+      - { label: 'Description', name: 'description', widget: 'text' }
+      - { label: 'Publish date', name: 'pubDate', widget: 'datetime', format: 'YYYY-MM-DD' }
+      - {
+          label: 'Category',
+          name: 'category',
+          widget: 'select',
+          options: ['Tech', 'Life', 'Reading'],
+          default: 'Life',
+        }
+      - { label: 'Tags', name: 'tags', widget: 'list', default: [] }
+      - { label: 'Hero image', name: 'heroImage', widget: 'image', required: false }
+      - { label: 'Sticky', name: 'sticky', widget: 'boolean', default: false }
+      - { label: 'Draft', name: 'draft', widget: 'boolean', default: false }
+      - {
+          label: 'Visibility',
+          name: 'visibility',
+          widget: 'select',
+          options: ['public', 'private'],
+          default: 'public',
+        }
+      - { label: 'Body', name: 'body', widget: 'markdown' }

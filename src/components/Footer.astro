@@ -1,0 +1,38 @@
+---
+import { AUTHOR, SITE_TITLE } from '../consts';
+import { ts, type Lang } from '../i18n/ui';
+
+interface Props {
+	lang?: Lang;
+}
+
+const { lang = 'zh' } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer" data-pagefind-ignore>
+	<p>© {year} {AUTHOR} · {SITE_TITLE}</p>
+	<p>
+		<a href={lang === 'en' ? '/en/rss.xml' : '/rss.xml'} target="_blank" rel="noopener">{ts(lang, 'footer_rss')}</a>
+		{' · '}
+		<a href="/sitemap-index.xml" target="_blank" rel="noopener">{ts(lang, 'footer_sitemap')}</a>
+	</p>
+</footer>
+
+<button id="back-to-top" class="back-to-top" title="↑" aria-label="↑">↑</button>
+<script is:inline>
+	(function () {
+		var btn = document.getElementById('back-to-top');
+		if (!btn) return;
+		window.addEventListener(
+			'scroll',
+			function () {
+				btn.classList.toggle('show', window.scrollY > 400);
+			},
+			{ passive: true }
+		);
+		btn.addEventListener('click', function () {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		});
+	})();
+</script>

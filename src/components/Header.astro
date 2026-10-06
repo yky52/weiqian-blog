@@ -1,0 +1,51 @@
+---
+import { SITE_TITLE } from '../consts';
+import { localizePath, ts, type Lang } from '../i18n/ui';
+import ThemeToggle from './ThemeToggle.astro';
+
+interface Props {
+	lang?: Lang;
+	// 语言切换目标地址（默认按当前路径映射；标签页等无法映射时可指定回退地址）
+	langSwitchUrl?: string;
+}
+
+const { lang = 'zh', langSwitchUrl } = Astro.props;
+const current = Astro.url.pathname;
+const other: Lang = lang === 'zh' ? 'en' : 'zh';
+const switchUrl = langSwitchUrl ?? localizePath(current, other);
+const switchText = other === 'en' ? 'EN' : '中文';
+
+const links = [
+	{ href: lang === 'en' ? '/en/' : '/', label: ts(lang, 'nav_home') },
+	{ href: lang === 'en' ? '/en/archive' : '/archive', label: ts(lang, 'nav_archive') },
+	{ href: lang === 'en' ? '/en/tags' : '/tags', label: ts(lang, 'nav_tags') },
+	{ href: lang === 'en' ? '/en/friends' : '/friends', label: ts(lang, 'nav_friends') },
+	{ href: lang === 'en' ? '/en/guestbook' : '/guestbook', label: ts(lang, 'nav_guestbook') },
+	{ href: lang === 'en' ? '/en/about' : '/about', label: ts(lang, 'nav_about') },
+];
+
+const isActive = (href: string) => {
+	const base = href === '/' || href === '/en/' ? href : href;
+	return current === base || (base !== '/' && base !== '/en/' && current.startsWith(base + '/'));
+};
+---
+
+<header class="site-header" data-pagefind-ignore>
+	<div class="site-header-inner">
+		<a class="site-logo" href={lang === 'en' ? '/en/' : '/'}>{SITE_TITLE}</a>
+		<nav class="site-nav" aria-label={ts(lang, 'nav_label')}>
+			{
+				links.map((link, i) => (
+					<a href={link.href} class={isActive(link.href) ? 'active keep' : i < 3 ? 'keep' : ''}>
+						{link.label}
+					</a>
+				))
+			}
+		</nav>
+		<div class="header-actions">
+			<a class="icon-btn" href={lang === 'en' ? '/en/search' : '/search'} title={ts(lang, 'nav_search')} aria-label={ts(lang, 'nav_search')}>🔍</a>
+			<a class="lang-switch" href={switchUrl} title={ts(lang, 'lang_switch_label')}>{switchText}</a>
+			<ThemeToggle />
+		</div>
+	</div>
+</header>

@@ -1,0 +1,54 @@
+---
+import '../styles/global.css';
+import { SITE_TITLE } from '../consts';
+import { htmlLang, ts, type Lang } from '../i18n/ui';
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: string;
+	noindex?: boolean;
+	lang?: Lang;
+}
+
+const { title, image = '/favicon.svg', noindex = false, lang = 'zh' } = Astro.props;
+const description = Astro.props.description ?? ts(lang, 'site_description');
+const fullTitle = title ? `${title} | ${SITE_TITLE}` : SITE_TITLE;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+<link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href={lang === 'en' ? '/en/rss.xml' : '/rss.xml'} />
+<meta name="generator" content={Astro.generator} />
+<link rel="canonical" href={canonicalURL} />
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+{noindex && <meta name="robots" content="noindex,nofollow" />}
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:site_name" content={SITE_TITLE} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={new URL(image, Astro.site)} />
+<meta property="og:locale" content={htmlLang(lang)} />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+
+<!-- 主题初始化：必须在 CSS 绘制前执行，避免暗色模式闪烁 -->
+<script is:inline>
+	(function () {
+		try {
+			var saved = localStorage.getItem('theme');
+			var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+			document.documentElement.setAttribute('data-theme', theme);
+		} catch (e) {}
+	})();
+</script>
