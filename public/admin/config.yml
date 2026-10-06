@@ -1,10 +1,12 @@
 # Decap CMS 配置：网页版写作后台
-# 使用前需要配置 GitHub OAuth（见 README 的部署说明）
+# 登录地址：https://weiqian-blog.pages.dev/admin/
+# GitHub OAuth 由同站 /oauth/* Functions 代理，无需第三方服务
 backend:
   name: github
-  repo: yourname/yourrepo # 改成你的 GitHub 仓库
+  repo: yky52/weiqian-blog
   branch: main
-  base_url: https://your-oauth-proxy.workers.dev # GitHub OAuth 代理地址
+  base_url: https://weiqian-blog.pages.dev
+  auth_endpoint: oauth/auth
 
 # 上传的图片存放位置
 media_folder: 'public/images/uploads'
