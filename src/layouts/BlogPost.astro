@@ -1,0 +1,221 @@
+---
+import { Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Giscus from '../components/Giscus.astro';
+import Header from '../components/Header.astro';
+import PostCard from '../components/PostCard.astro';
+import { htmlLang, ts, type Lang } from '../i18n/ui';
+import { formatDate } from '../utils/format';
+import { getAllPublishedPosts, getRelatedPosts, postSlug, postUrl } from '../utils/posts';
+import { countWords, readingTime } from '../utils/reading';
+
+interface Props {
+	post: CollectionEntry<'blog'>;
+	lang: Lang;
+}
+
+const { post, lang } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, category, tags, visibility } = post.data;
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 4);
+
+const tagBase = lang === 'en' ? '/en/tags' : '/tags';
+const all = await getAllPublishedPosts(lang);
+const idx = all.findIndex((p) => p.id === post.id);
+const prev = idx > 0 ? all[idx - 1] : null;
+const next = idx >= 0 && idx < all.length - 1 ? all[idx + 1] : null;
+const related = getRelatedPosts(post, all.filter((p) => p.data.visibility === 'public'));
+
+const words = countWords(post.body);
+const minutes = readingTime(post.body);
+const slug = postSlug(post);
+---
+
+<html lang={htmlLang(lang)}>
+	<head>
+		<BaseHead
+			title={title}
+			description={description}
+			image={heroImage?.src}
+			noindex={visibility === 'private'}
+			lang={lang}
+		/>
+	</head>
+	<body>
+		<Header lang={lang} />
+		<main data-pagefind-body>
+			<article>
+				<header class="post-header">
+					<div class="post-meta" style="justify-content:center">
+						<time>{formatDate(pubDate)}</time>
+						{
+							updatedDate && (
+								<span>
+									{ts(lang, 'updated')} {formatDate(updatedDate)}
+								</span>
+							)
+						}
+						<a class="tag" href={`${tagBase}/${encodeURIComponent(category)}/`}>{category}</a>
+						<span>{words} {ts(lang, 'words')}</span>
+						<span>{minutes} {ts(lang, 'min_read')}</span>
+						<span title={ts(lang, 'views')}>👁 <span data-views>–</span></span>
+					</div>
+					<h1>{title}</h1>
+					{
+						tags.length > 0 && (
+							<div class="post-meta" style="justify-content:center">
+								{tags.map((t) => (
+									<a class="tag" href={`${tagBase}/${encodeURIComponent(t)}/`}>
+										#{t}
+									</a>
+								))}
+							</div>
+						)
+					}
+				</header>
+
+				{heroImage && <div class="post-hero"><Image src={heroImage} alt={title} width={1020} /></div>}
+
+				{
+					toc.length > 0 && (
+						<nav class="toc toc-floating" aria-label={ts(lang, 'toc')}>
+							<div class="toc-title">{ts(lang, 'toc')}</div>
+							<ul>
+								{toc.map((h) => (
+									<li class={`toc-h${h.depth}`}>
+										<a href={`#${h.slug}`}>{h.text}</a>
+									</li>
+								))}
+							</ul>
+						</nav>
+					)
+				}
+
+				<div class="prose">
+					<Content />
+				</div>
+			</article>
+
+			<div class="like-wrap">
+				<button id="like-btn" class="like-btn" data-slug={slug} aria-label={ts(lang, 'like_aria')}>
+					<span class="like-icon">🤍</span> <span data-likes>–</span>
+				</button>
+			</div>
+
+			<nav class="post-nav" aria-label="post-nav">
+				{prev ? <a href={postUrl(prev)}>← {prev.data.title}</a> : <span />}
+				{next ? <a class="next" href={postUrl(next)}>{next.data.title} →</a> : <span />}
+			</nav>
+
+			{
+				related.length > 0 && (
+					<section class="related-posts">
+						<h2>{ts(lang, 'related')}</h2>
+						{related.map((p) => (
+							<PostCard post={p} lang={lang} />
+						))}
+					</section>
+				)
+			}
+
+			<Giscus lang={lang} />
+		</main>
+		<Footer lang={lang} />
+
+		<!-- 阅读量 / 点赞：需要 Cloudflare Pages + D1 部署后生效，未部署时静默跳过 -->
+		<script is:inline>
+			(function () {
+				var btn = document.getElementById('like-btn');
+				if (!btn) return;
+				var slug = btn.getAttribute('data-slug');
+				var viewsEl = document.querySelector('[data-views]');
+				var likesEl = document.querySelector('[data-likes]');
+				var api = '/api/stats/' + encodeURIComponent(slug);
+
+				function render(stats) {
+					if (viewsEl) viewsEl.textContent = stats.views;
+					if (likesEl) likesEl.textContent = stats.likes;
+					if (localStorage.getItem('liked:' + slug)) {
+						btn.querySelector('.like-icon').textContent = '❤️';
+					}
+				}
+
+				fetch(api)
+					.then(function (r) {
+						return r.ok ? r.json() : null;
+					})
+					.then(function (stats) {
+						if (stats) render(stats);
+					})
+					.catch(function () {});
+
+				if (!sessionStorage.getItem('viewed:' + slug)) {
+					fetch(api, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ action: 'view' }),
+					})
+						.then(function (r) {
+							return r.ok ? r.json() : null;
+						})
+						.then(function (stats) {
+							if (stats) {
+								render(stats);
+								sessionStorage.setItem('viewed:' + slug, '1');
+							}
+						})
+						.catch(function () {});
+				}
+
+				btn.addEventListener('click', function () {
+					if (localStorage.getItem('liked:' + slug)) return;
+					fetch(api, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ action: 'like' }),
+					})
+						.then(function (r) {
+							return r.ok ? r.json() : null;
+						})
+						.then(function (stats) {
+							if (stats) {
+								localStorage.setItem('liked:' + slug, '1');
+								render(stats);
+							}
+						})
+						.catch(function () {});
+				});
+			})();
+		</script>
+
+		<!-- 代码块一键复制 -->
+		<script is:inline define:vars={{ copyLabel: ts(lang, 'copy'), copiedLabel: ts(lang, 'copied'), failedLabel: ts(lang, 'copy_failed') }}>
+			(function () {
+				document.querySelectorAll('.prose pre').forEach(function (pre) {
+					if (pre.querySelector('.copy-btn')) return;
+					var btn = document.createElement('button');
+					btn.className = 'copy-btn';
+					btn.textContent = copyLabel;
+					btn.addEventListener('click', function () {
+						var code = pre.querySelector('code');
+						var text = code ? code.innerText : pre.innerText;
+						navigator.clipboard
+							.writeText(text)
+							.then(function () {
+								btn.textContent = copiedLabel;
+								setTimeout(function () {
+									btn.textContent = copyLabel;
+								}, 1500);
+							})
+							.catch(function () {
+								btn.textContent = failedLabel;
+							});
+					});
+					pre.appendChild(btn);
+				});
+			})();
+		</script>
+	</body>
+</html>

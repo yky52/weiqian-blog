@@ -1,0 +1,31 @@
+---
+// 通用固定页面布局：关于、友链等
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { htmlLang, type Lang } from '../i18n/ui';
+
+interface Props {
+	title: string;
+	description?: string;
+	lang: Lang;
+}
+
+const { title, description, lang } = Astro.props;
+---
+
+<html lang={htmlLang(lang)}>
+	<head>
+		<BaseHead title={title} description={description} lang={lang} />
+	</head>
+	<body>
+		<Header lang={lang} />
+		<main data-pagefind-body>
+			<h1 style="margin-top:0">{title}</h1>
+			<div class="prose">
+				<slot />
+			</div>
+		</main>
+		<Footer lang={lang} />
+	</body>
+</html>

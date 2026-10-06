@@ -1,0 +1,8 @@
+---
+import { getPublicPosts } from '../utils/posts';
+import ArchiveView from '../views/ArchiveView.astro';
+
+const posts = await getPublicPosts('zh');
+---
+
+<ArchiveView lang="zh" posts={posts} />
