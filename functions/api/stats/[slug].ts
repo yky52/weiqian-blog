@@ -13,9 +13,17 @@ async function getStats(env: Env, slug: string) {
 	return { views: row?.views ?? 0, likes: row?.likes ?? 0 };
 }
 
+function cleanSlug(raw: string): string {
+	try {
+		return decodeURIComponent(raw);
+	} catch {
+		return raw;
+	}
+}
+
 export const onRequestGet: PagesFunction<Env> = async ({ params, env }) => {
 	try {
-		const slug = String(params.slug);
+		const slug = cleanSlug(String(params.slug));
 		return Response.json(await getStats(env, slug));
 	} catch {
 		return Response.json({ views: 0, likes: 0 });
@@ -24,7 +32,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ params, env }) => {
 
 export const onRequestPost: PagesFunction<Env> = async ({ params, request, env }) => {
 	try {
-		const slug = String(params.slug);
+		const slug = cleanSlug(String(params.slug));
 		const { action } = (await request.json()) as { action?: string };
 		if (action !== 'view' && action !== 'like') {
 			return Response.json({ error: 'invalid action' }, { status: 400 });
